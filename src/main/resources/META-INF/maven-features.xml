@@ -1,0 +1,4 @@
+<idea-plugin>
+    <!-- Maven-specific extensions would go here if needed -->
+    <!-- This file enables the optional Maven dependency -->
+</idea-plugin>
