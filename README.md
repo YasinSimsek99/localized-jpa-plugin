@@ -6,6 +6,12 @@
 
 IntelliJ IDEA plugin that provides full IDE support for the [LocalizedJPA](https://github.com/YasinSimsek99/localized-jpa) annotation processor library.
 
+---
+
+**🚀 [Install from JetBrains Marketplace](https://plugins.jetbrains.com/plugin/29551-localizedjpa)**
+
+---
+
 <p align="center">
   <img src="images/setName.gif" alt="Autocomplete Demo" width="700"/>
 </p>
