@@ -95,14 +95,14 @@ class LocalizedJpaPsiAugmentProvider : PsiAugmentProvider(), DumbAware {
         return if (type == PsiMethod::class.java) {
             CachedValuesManager.getCachedValue(element) {
                 val methods = generateLocalizedMethods(element).toMutableList()
-                methods.addAll(generateTranslationsAccessors(element))
+                // Removed: translations accessors (getTranslations/setTranslations)
+                // Users typically don't need these in autocomplete
                 CachedValueProvider.Result.create(methods, element)
             } as MutableList<Psi>
         } else {
+            // No synthetic fields needed
             CachedValuesManager.getCachedValue(element) {
-                val fields = mutableListOf<PsiField>()
-                generateTranslationsField(element)?.let { fields.add(it) }
-                CachedValueProvider.Result.create(fields, element)
+                CachedValueProvider.Result.create(mutableListOf<PsiField>(), element)
             } as MutableList<Psi>
         }
     }
@@ -129,8 +129,13 @@ class LocalizedJpaPsiAugmentProvider : PsiAugmentProvider(), DumbAware {
      * Generates getter/setter methods for each @Localized field.
      *
      * For a field `private String name;` annotated with `@Localized`, generates:
-     * - `public String getName(Locale locale)`
-     * - `public void setName(String value, Locale locale)`
+     * - `public String getName()` - Default getter (if not already defined)
+     * - `public void setName(String value)` - Default setter (if not already defined)
+     * - `public String getName(Locale locale)` - Locale-aware getter (if not already defined)
+     * - `public void setName(String value, Locale locale)` - Locale-aware setter (if not already defined)
+     *
+     * NOTE: Methods are only generated if they don't already exist in the class.
+     * This prevents conflicts when users define their own default getters/setters.
      *
      * @param psiClass The class containing @Localized fields
      * @return List of generated light methods
@@ -149,25 +154,76 @@ class LocalizedJpaPsiAugmentProvider : PsiAugmentProvider(), DumbAware {
             val capitalizedName = fieldName.replaceFirstChar { it.uppercase() }
             val fieldType = field.type
 
-            // String getName(Locale locale)
-            val getter = LightMethodBuilder(manager, "get$capitalizedName")
-                .setMethodReturnType(fieldType)
-                .setContainingClass(psiClass)
-                .addParameter("locale", "java.util.Locale")
-                .addModifier(PsiModifier.PUBLIC)
-            methods.add(getter)
+            // Default getter: String getName()
+            // Only add if user hasn't already defined it
+            if (!hasMethod(psiClass, "get$capitalizedName", 0)) {
+                val defaultGetter = LightMethodBuilder(manager, "get$capitalizedName")
+                    .setMethodReturnType(fieldType)
+                    .setContainingClass(psiClass)
+                    .addModifier(PsiModifier.PUBLIC)
+                methods.add(defaultGetter)
+            }
 
-            // void setName(String value, Locale locale)
-            val setter = LightMethodBuilder(manager, "set$capitalizedName")
-                .setMethodReturnType(PsiTypes.voidType())
-                .setContainingClass(psiClass)
-                .addParameter("value", fieldType)
-                .addParameter("locale", "java.util.Locale")
-                .addModifier(PsiModifier.PUBLIC)
-            methods.add(setter)
+            // Default setter: void setName(String value)
+            // Only add if user hasn't already defined it
+            if (!hasMethod(psiClass, "set$capitalizedName", 1)) {
+                val defaultSetter = LightMethodBuilder(manager, "set$capitalizedName")
+                    .setMethodReturnType(PsiTypes.voidType())
+                    .setContainingClass(psiClass)
+                    .addParameter("value", fieldType)
+                    .addModifier(PsiModifier.PUBLIC)
+                methods.add(defaultSetter)
+            }
+
+            // Locale-aware getter: String getName(Locale locale)
+            // Only add if user hasn't already defined it
+            if (!hasMethod(psiClass, "get$capitalizedName", 1)) {
+                val localeGetter = LightMethodBuilder(manager, "get$capitalizedName")
+                    .setMethodReturnType(fieldType)
+                    .setContainingClass(psiClass)
+                    .addParameter("locale", "java.util.Locale")
+                    .addModifier(PsiModifier.PUBLIC)
+                methods.add(localeGetter)
+            }
+
+            // Locale-aware setter: void setName(String value, Locale locale)
+            // Only add if user hasn't already defined it
+            if (!hasMethod(psiClass, "set$capitalizedName", 2)) {
+                val localeSetter = LightMethodBuilder(manager, "set$capitalizedName")
+                    .setMethodReturnType(PsiTypes.voidType())
+                    .setContainingClass(psiClass)
+                    .addParameter("value", fieldType)
+                    .addParameter("locale", "java.util.Locale")
+                    .addModifier(PsiModifier.PUBLIC)
+                methods.add(localeSetter)
+            }
         }
 
         return methods
+    }
+
+    /**
+     * Checks if a method with the given name and parameter count already exists in the class.
+     * 
+     * This prevents generating duplicate methods when users define their own getters/setters.
+     * We only check methods declared directly in this class (not inherited or augmented ones).
+     *
+     * @param psiClass The class to check
+     * @param methodName The method name to look for
+     * @param paramCount The expected parameter count
+     * @return true if a method with this signature already exists
+     */
+    private fun hasMethod(psiClass: PsiClass, methodName: String, paramCount: Int): Boolean {
+        // Use ownMethods to avoid checking augmented methods (prevents recursion)
+        val ownMethods = if (psiClass is PsiExtensibleClass) {
+            psiClass.ownMethods
+        } else {
+            psiClass.children.filterIsInstance<PsiMethod>()
+        }
+        
+        return ownMethods.any { method ->
+            method.name == methodName && method.parameterList.parametersCount == paramCount
+        }
     }
 
     /**

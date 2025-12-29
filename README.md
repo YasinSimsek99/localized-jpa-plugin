@@ -35,8 +35,12 @@ public class Product {
 ```
 
 **Synthetic methods available in IDE:**
+- `getName()` - Get name (default locale)
+- `setName(String value)` - Set name (default locale)
 - `getName(Locale locale)` - Get localized name
 - `setName(String value, Locale locale)` - Set localized name
+- `getDescription()` - Get description (default locale)
+- `setDescription(String value)` - Set description (default locale)
 - `getDescription(Locale locale)` - Get localized description
 - `setDescription(String value, Locale locale)` - Set localized description
 
@@ -92,18 +96,21 @@ public class Product {
     @Localized
     private String name;
     
-    // IDE now recognizes:
-    // - getName(Locale locale)
-    // - setName(String value, Locale locale)
+    // IDE now recognizes ALL methods:
+    // - getName() / setName(String)
+    // - getName(Locale) / setName(String, Locale)
 }
 ```
 
 ### 4. Enjoy Full IDE Support
 ```java
 Product product = new Product();
-product.setName("Laptop", Locale.ENGLISH);      // ✅ Autocomplete works!
-product.setName("Dizüstü", new Locale("tr"));   // ✅ No red underlines!
-String name = product.getName(Locale.ENGLISH);  // ✅ Recognized by IDE!
+product.setName("Laptop");                       // ✅ Default setter works!
+product.setName("Laptop", Locale.ENGLISH);      // ✅ Locale-aware setter works!
+product.setName("Dizüstü", new Locale("tr"));   // ✅ Turkish translation!
+
+String name = product.getName();                 // ✅ Default getter works!
+String enName = product.getName(Locale.ENGLISH); // ✅ Locale-aware getter works!
 ```
 
 ---

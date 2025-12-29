@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.localizedjpa"
-version = "0.1.1"
+version = "0.1.2"
 
 repositories {
     mavenCentral()
@@ -38,7 +38,7 @@ intellijPlatform {
             
             <h3>Features</h3>
             <ul>
-                <li>Code completion for localized getter/setter methods (e.g., <code>getName(Locale)</code>, <code>setName(String, Locale)</code>)</li>
+                <li>Code completion for both default methods (e.g., <code>getName()</code>, <code>setName(String)</code>) and locale-aware methods (e.g., <code>getName(Locale)</code>, <code>setName(String, Locale)</code>)</li>
                 <li>Automatic detection of LocalizedJPA library in project dependencies</li>
                 <li>One-click annotation processing configuration</li>
                 <li>Recognition of synthetic methods generated at compile-time</li>
@@ -63,6 +63,15 @@ intellijPlatform {
         }
 
         changeNotes = """
+            <h3>0.1.2 - Enhanced Method Support</h3>
+            <ul>
+                <li><b>Default Getter/Setter</b> - Added getName() and setName(String) method generation</li>
+                <li><b>Complete Method Set</b> - IDE now recognizes all four methods for @Localized fields</li>
+                <li><b>Smart Method Generation</b> - Plugin checks if user has already defined methods to prevent duplicates</li>
+                <li><b>Improved Autocomplete</b> - Better developer experience with standard bean methods</li>
+                <li><b>Method Overloading</b> - Both default and locale-aware methods coexist seamlessly</li>
+            </ul>
+            
             <h3>0.1.1 - Initial Release</h3>
             <ul>
                 <li><b>PSI Augment Provider</b> - Full autocomplete support for @LocalizedEntity synthetic methods</li>

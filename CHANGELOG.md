@@ -5,6 +5,27 @@ All notable changes to the LocalizedJPA IntelliJ IDEA Plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2025-12-30
+
+### Added
+- **Default Getter/Setter Methods** - Plugin now generates `getName()` and `setName(String)` methods for `@Localized` fields
+- **Complete Method Coverage** - IDE autocomplete now shows all four methods: default pair and locale-aware pair
+- **Method Overloading Support** - Both `getName()` and `getName(Locale)` coexist without conflicts
+- **Smart Method Generation** - `hasMethod()` helper function to detect existing method signatures
+- **Method Conflict Prevention** - Plugin checks if user has already defined getter/setter methods before generating synthetic ones
+
+### Changed
+- **Method Generation Order** - Default getter/setter appear first in autocomplete, followed by locale-aware versions
+- **Enhanced Documentation** - Updated README and plugin description to demonstrate both method types
+
+### Technical Details
+- Enhanced `LocalizedJpaPsiAugmentProvider.generateLocalizedMethods()` to create standard Java bean methods
+- Plugin only generates methods that don't already exist in the class (using `ownMethods` to check)
+- Users can define custom implementations of default or locale-aware methods without conflicts
+- Added comprehensive test cases for default method generation, method overloading, and conflict prevention scenarios
+- Test suite expanded from 10 to 15 test cases
+- Maintains full backward compatibility with existing code using locale-aware methods
+
 ## [0.1.1] - 2025-12-29
 
 ### Added
