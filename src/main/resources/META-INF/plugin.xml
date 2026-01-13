@@ -91,4 +91,9 @@ public class Product {
             displayType="STICKY_BALLOON"
             isLogByDefault="true" />
     </extensions>
+
+    <projectListeners>
+        <listener class="com.localizedjpa.intellij.LocalizedJpaDependencyUpdater"
+                  topic="com.intellij.openapi.roots.ModuleRootListener"/>
+    </projectListeners>
 </idea-plugin>

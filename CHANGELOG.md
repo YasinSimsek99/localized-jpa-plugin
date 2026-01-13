@@ -5,6 +5,13 @@ All notable changes to the LocalizedJPA IntelliJ IDEA Plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-01-13
+
+### Added
+- **Extended Compatibility** - Now compatible with IntelliJ IDEA 2024.1 and newer (Java 17+).
+- **Dynamic Library Detection** - Plugin now instantly detects when `LocalizedJPA` library is added to `pom.xml` or `build.gradle` without requiring a restart.
+- **Improved Notification** - Smarter prompts to enable annotation processing upon library detection.
+
 ## [0.1.2] - 2025-12-30
 
 ### Added

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.localizedjpa"
-version = "0.1.2"
+version = "0.1.3"
 
 repositories {
     mavenCentral()
@@ -58,11 +58,17 @@ intellijPlatform {
         }
         
         ideaVersion {
-            sinceBuild = "252"  // IntelliJ IDEA 2025.2
+            sinceBuild = "241"  // IntelliJ IDEA 2024.1
             // untilBuild removed for forward compatibility (recommended for 2024.3+)
         }
 
         changeNotes = """
+            <h3>0.1.3 - Dynamic Detection</h3>
+            <ul>
+                <li><b>Dynamic Library Detection</b> - Instant notification when LocalizedJPA library is added to project</li>
+                <li><b>Smarter Configuration</b> - Improved prompts for enabling annotation processing</li>
+            </ul>
+
             <h3>0.1.2 - Enhanced Method Support</h3>
             <ul>
                 <li><b>Default Getter/Setter</b> - Added getName() and setName(String) method generation</li>
@@ -95,8 +101,8 @@ intellijPlatform {
 tasks {
     // Set the JVM compatibility versions
     withType<JavaCompile> {
-        sourceCompatibility = "21"  // Required by IntelliJ Platform 2025.2+
-        targetCompatibility = "21"
+        sourceCompatibility = "17"  // Required by IntelliJ Platform 2024.1+
+        targetCompatibility = "17"
     }
     
     // Configure test task for IntelliJ Platform tests
@@ -107,6 +113,6 @@ tasks {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }

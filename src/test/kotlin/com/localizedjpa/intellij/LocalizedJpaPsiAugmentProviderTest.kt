@@ -37,6 +37,20 @@ class LocalizedJpaPsiAugmentProviderTest : BasePlatformTestCase() {
             "java/util/Locale.java",
             "package java.util; public class Locale {}"
         )
+        
+        // Mock Lombok annotations
+        myFixture.addFileToProject(
+            "lombok/Getter.java",
+            "package lombok; public @interface Getter {}"
+        )
+        myFixture.addFileToProject(
+            "lombok/Setter.java",
+            "package lombok; public @interface Setter {}"
+        )
+        myFixture.addFileToProject(
+            "lombok/Data.java",
+            "package lombok; public @interface Data {}"
+        )
 
         // Register the augmentation provider explicitly using ExtensionTestUtil
         ExtensionTestUtil.maskExtensions(
@@ -430,6 +444,85 @@ class LocalizedJpaPsiAugmentProviderTest : BasePlatformTestCase() {
         
         assertNotNull("Plugin's default getter getDescription() should exist", defaultGetter)
         assertNotNull("User's locale getter getDescription(Locale) should exist", localeGetter)
+    }
+
+    /**
+     * Test: Plugin should NOT generate default getter/setter when class has Lombok @Getter/@Setter.
+     * Plugin SHOULD still generate locale-aware methods since Lombok doesn't handle those.
+     */
+    fun `test no default methods when class has Lombok Getter Setter`() {
+        myFixture.configureByText("LombokProduct.java", """
+            import com.localizedjpa.annotations.Localized;
+            import lombok.Getter;
+            import lombok.Setter;
+            import java.util.Locale;
+
+            @Getter
+            @Setter
+            public class LombokProduct {
+                @Localized
+                private String name;
+            }
+        """)
+
+        val psiClass = JavaPsiFacade.getInstance(project).findClass(
+            "LombokProduct", 
+            GlobalSearchScope.allScope(project)
+        )
+
+        assertNotNull("Class 'LombokProduct' should be found", psiClass)
+        
+        // Find all getName methods
+        val getterMethods = psiClass!!.findMethodsByName("getName", false)
+        
+        // Should have ONLY 1 getter: getName(Locale) - NOT getName() since Lombok handles that
+        assertEquals("Should have only 1 getName method (locale version only)", 1, getterMethods.size)
+        
+        val localeGetter = getterMethods.find { it.parameterList.parametersCount == 1 }
+        assertNotNull("Locale getter getName(Locale) should exist", localeGetter)
+        
+        // Find all setName methods
+        val setterMethods = psiClass.findMethodsByName("setName", false)
+        
+        // Should have ONLY 1 setter: setName(String, Locale) - NOT setName(String) since Lombok handles that
+        assertEquals("Should have only 1 setName method (locale version only)", 1, setterMethods.size)
+        
+        val localeSetter = setterMethods.find { it.parameterList.parametersCount == 2 }
+        assertNotNull("Locale setter setName(String, Locale) should exist", localeSetter)
+    }
+
+    /**
+     * Test: Plugin should NOT generate default getter/setter when class has Lombok @Data.
+     */
+    fun `test no default methods when class has Lombok Data`() {
+        myFixture.configureByText("DataProduct.java", """
+            import com.localizedjpa.annotations.Localized;
+            import lombok.Data;
+            import java.util.Locale;
+
+            @Data
+            public class DataProduct {
+                @Localized
+                private String title;
+            }
+        """)
+
+        val psiClass = JavaPsiFacade.getInstance(project).findClass(
+            "DataProduct", 
+            GlobalSearchScope.allScope(project)
+        )
+
+        assertNotNull("Class 'DataProduct' should be found", psiClass)
+        
+        // Find all getTitle methods - should only have locale version
+        val getterMethods = psiClass!!.findMethodsByName("getTitle", false)
+        assertEquals("Should have only 1 getTitle method (locale version)", 1, getterMethods.size)
+        assertEquals("Method should have 1 parameter (Locale)", 1, getterMethods[0].parameterList.parametersCount)
+        
+        // Find all setTitle methods - should only have locale version
+        val setterMethods = psiClass.findMethodsByName("setTitle", false)
+        assertEquals("Should have only 1 setTitle method (locale version)", 1, setterMethods.size)
+        assertEquals("Method should have 2 parameters (String, Locale)", 2, setterMethods[0].parameterList.parametersCount)
     }
 
     private fun assertMethodExists(

@@ -31,6 +31,11 @@ import com.intellij.openapi.startup.ProjectActivity
  */
 class LocalizedJpaStartupActivity : ProjectActivity {
 
+    override suspend fun execute(project: Project) {
+        LOG.info("$LOG_PREFIX StartupActivity executed for project: ${project.name}")
+        checkAndNotify(project)
+    }
+
     companion object {
         private val LOG = Logger.getInstance(LocalizedJpaStartupActivity::class.java)
         
@@ -65,28 +70,32 @@ class LocalizedJpaStartupActivity : ProjectActivity {
                 }
             }
         }
-    }
 
-    override suspend fun execute(project: Project) {
-        LOG.info("$LOG_PREFIX StartupActivity executed for project: ${project.name}")
-        
-        // Check if LocalizedJPA library is in the project
-        if (!hasLocalizedJpaLibrary(project)) {
-            return
+        /**
+         * Checks if LocalizedJPA is present and triggers notification if needed.
+         * Can be called from StartupActivity or ModuleRootListener.
+         */
+        fun checkAndNotify(project: Project) {
+            val activity = LocalizedJpaStartupActivity()
+            
+            // Check if LocalizedJPA library is in the project
+            if (!activity.hasLocalizedJpaLibrary(project)) {
+                return
+            }
+
+            // Check if already fully configured
+            if (activity.isFullyConfigured(project)) {
+                return
+            }
+
+            // Check if user chose "Don't ask again"
+            if (activity.isDontAskAgain(project)) {
+                return
+            }
+
+            // Show notification to enable full configuration
+            activity.showConfigurationNotification(project)
         }
-
-        // Check if already fully configured
-        if (isFullyConfigured(project)) {
-            return
-        }
-
-        // Check if user chose "Don't ask again"
-        if (isDontAskAgain(project)) {
-            return
-        }
-
-        // Show notification to enable full configuration
-        showConfigurationNotification(project)
     }
 
     /**
