@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+    width="16" height="16"
+    viewBox="0 0 40 40"
+    fill="none">
+
+    <!-- Enlarged icon logic centered perfectly -->
+    <g transform="translate(-2 -2) scale(1.1)">
+
+        <defs>
+            <mask id="perfectCenterMask">
+                <rect x="0" y="0" width="40" height="40" fill="white" />
+                <circle cx="20" cy="22" r="11" fill="black" />
+            </mask>
+        </defs>
+
+        <!-- DB (TOP ONLY, bottom layers removed) -->
+        <g stroke="#6DB33F"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            mask="url(#perfectCenterMask)">
+            <!-- top ellipse -->
+            <ellipse cx="20" cy="7" rx="14" ry="4" />
+            <!-- body -->
+            <path d="M6 7V33C6 35.2 12.3 37 20 37C27.7 37 34 35.2 34 33V7" />
+        </g>
+
+        <g stroke="#6DB33F"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            transform="translate(0 3)">
+            <circle cx="20" cy="20" r="9" />
+
+            <path d="M12.4 17.6 C15.2 19.1 24.8 19.1 27.6 17.6" />
+            <path d="M12.4 22.4 C15.2 20.9 24.8 20.9 27.6 22.4" />
+
+            <path d="M16.7 12.0 C14.9 15.1 14.9 24.9 16.7 28.0" />
+            <path d="M23.3 12.0 C25.1 15.1 25.1 24.9 23.3 28.0" />
+        </g>
+
+    </g>
+</svg>
